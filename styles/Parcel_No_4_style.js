@@ -1,44 +1,48 @@
-var size = 0;
-var placement = 'point';
-
 var style_Parcel_No_4 = function(feature, resolution){
-    var context = {
-        feature: feature,
-        variables: {}
-    };
-    var value = ""
     var labelText = "";
-    size = 0;
-    var labelFont = "13.0px \'Open Sans\', sans-serif";
+    var labelFont = "13.0px 'Open Sans', sans-serif";
     var labelFill = "#fe314f";
     var bufferColor = "";
     var bufferWidth = 0;
-    var textAlign = "left";
-    var offsetX = 8;
-    var offsetY = 3;
-    var placement = 'point';
-    if (feature.get("Length") !== null) {
-        // Get the length value
-        let Shape_AreaValue = feature.get("Shape_Area");
     
-        // Convert to a number
-        Shape_AreaValue = Number(Shape_AreaValue);
-    
-        // Check if the value is a valid number
-        if (!isNaN(Shape_AreaValue)) {
-            // Format to two decimal places
-            labelText = Shape_AreaValue.toFixed(3)+"Sqm";
+    // Get the BSI_str property and Shape_Area value
+    var bsiStr = feature.get("BSI_str");
+    var shapeArea = feature.get("Shape_Area");
+
+    // Check for both properties and format label text
+    if (bsiStr !== null && shapeArea !== null) {
+        // Ensure shapeArea is a number and format correctly
+        shapeArea = parseFloat(shapeArea);
+        if (!isNaN(shapeArea)) {
+            labelText = `${bsiStr}\nArea: ${shapeArea.toFixed(2)}`;
         } else {
-            // Handle the case where Shape_AreaValue is not a number
-            labelText = "Invalid Shape_Area"; // or some other fallback value
+            labelText = `${bsiStr}\nArea: Invalid Shape Area`;
         }
     }
-        var style = [ new ol.style.Style({
-            stroke: new ol.style.Stroke({color: 'rgba(255,3,3,1.0)', lineDash: null, lineCap: 'square', lineJoin: 'bevel', width: 2}),
-            text: createTextStyle(feature, resolution, labelText, labelFont,
-                                  labelFill, placement, bufferColor,
-                                  bufferWidth)
-        })];
-    
-        return style;
-    };
+
+    var style = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 4.0,
+            stroke: new ol.style.Stroke({
+                color: 'rgba(35,35,35,1.0)',
+                width: 0.0
+            }),
+            fill: new ol.style.Fill({
+                color: 'rgba(190,207,80,1.0)'
+            })
+        }),
+        
+        text: new ol.style.Text({
+            font: labelFont,
+            text: labelText,
+            fill: new ol.style.Fill({
+                color: labelFill
+            }),
+            offsetX: 8,
+            offsetY: 3,
+            placement: 'point',
+        })
+    });
+
+    return [style]; // Return an array of styles
+};
